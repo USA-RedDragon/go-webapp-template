@@ -1,0 +1,88 @@
+version: 2.1
+jobs:
+  lint:
+    docker:
+      - image: circleci/node:10.15
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: cd frontend && npm ci
+      - run:
+          name: Lint
+          command: cd frontend && npm run lint -- --format junit --output-file ./testresults/eslint/results.xml
+      - store_test_results:
+          path: testresults
+
+  test-e2e:
+    docker:
+      - image: cypress/base:10.15.3
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: cd frontend && npm ci
+      - run:
+          name: Test
+          command: cd frontend && npm run test:e2e -- --headless --reporter junit
+          environment:
+            MOCHA_FILE: ./testresults/cypress/results.xml
+      - store_artifacts:
+          path: tests/e2e/videos
+      - store_test_results:
+          path: testresults
+
+  test-unit:
+    docker:
+      - image: circleci/node:10.15
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: cd frontend && npm ci
+      - run:
+          name: Test
+          command: cd frontend && npm run test:unit -- --reporter mocha-junit-reporter
+          environment:
+            MOCHA_FILE: ./testresults/mocha/results.xml
+      - store_test_results:
+          path: testresults
+
+  build:
+    docker:
+      - image: docker:stable-git
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: docker build -t frontend .
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - lint
+      - test-e2e
+      - test-unit
+      - build:
+          requires:
+            - lint
+            - test-e2e
+            - test-unit
+          filters:
+            branches:
+              only:
+                - master

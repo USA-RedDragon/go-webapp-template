@@ -1,0 +1,14 @@
+.circleci/
+bin/
+frontend/dist/
+frontend/node_modules/
+frontend/testresults/
+frontend/tests/
+frontend/.gitignore
+frontend/cypress.json
+frontend/README.md
+pkg/
+.dockerignore
+.gitignore
+Dockerfile
+README.md
