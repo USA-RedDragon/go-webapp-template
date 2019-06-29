@@ -5,9 +5,6 @@
 ## Required Software
 
 - Go
-- <https://github.com/mitchellh/gox>
-- <https://github.com/elazarl/go-bindata-assetfs>
-- <https://github.com/gorilla/mux>
 
 ## Bumping the version
 
